@@ -3,20 +3,38 @@ import fs from 'fs/promises'
 import parseFrontMatter from 'front-matter'
 import invariant from 'tiny-invariant'
 import { marked } from 'marked'
+import { instanceOfNodeError } from '~/utils'
 
-export type Post = {
+export interface JsonPost extends Omit<Post, 'date'> {
+  date: string
+}
+
+export interface Post {
   slug: string
   title: string
   date: Date
+  html: string
+  markdown: string
 }
 
-export type PostMarkdownAttributes = {
+export interface PostMarkdownAttributes {
   title: string
   date: string
 }
 
+interface NewPost {
+  title: string
+  slug: string
+  date: string
+  markdown: string
+}
+
 // relative to the server output not the source!
 const postsPath = path.join(__dirname, '..', 'posts')
+
+function pathFromSlug(slug: string) {
+  return path.join(postsPath, slug + '.md')
+}
 
 function isValidPostAttributes(
   attributes: any
@@ -47,8 +65,20 @@ export async function getPosts() {
   )
 }
 
-export async function getPost(slug: string) {
-  const filepath = path.join(postsPath, slug + '.md')
+export async function maybeGetPost(slug: string) {
+  try {
+    return await getPost(slug)
+  } catch (e) {
+    if (instanceOfNodeError(e, Error) && e.code === 'ENOENT') {
+      return null
+    }
+
+    throw e
+  }
+}
+
+export async function getPost(slug: string): Promise<JsonPost> {
+  const filepath = pathFromSlug(slug)
   const file = await fs.readFile(filepath)
   const { attributes, body } = parseFrontMatter(file.toString())
   invariant(
@@ -61,20 +91,26 @@ export async function getPost(slug: string) {
     html,
     title: attributes.title,
     date: attributes.date,
+    markdown: body,
   }
 }
 
-type NewPost = {
-  title: string
-  slug: string
-  date: string
-  markdown: string
+function createFileContents(post: NewPost) {
+  let md = `---\n`
+  md += `title: ${post.title}\n`
+  md += `date: ${post.date}\n`
+  md += `---\n`
+  md += `\n${post.markdown}`
+
+  return md
 }
 
 export async function createPost(post: NewPost) {
-  let md = `---\ntitle: ${post.title}\n---\n`
-  md += `---\ndate: ${post.date}\n---\n`
-  md += `\n${post.markdown}`
-  await fs.writeFile(path.join(postsPath, post.slug + '.md'), md)
+  await fs.writeFile(pathFromSlug(post.slug), createFileContents(post))
+
   return getPost(post.slug)
+}
+
+export async function removePost(slug: string) {
+  await fs.unlink(pathFromSlug(slug))
 }

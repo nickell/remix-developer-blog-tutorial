@@ -8,7 +8,7 @@ import {
 import { createPost } from '~/posts'
 import invariant from 'tiny-invariant'
 
-type PostError = {
+export type PostError = {
   title?: boolean
   slug?: boolean
   markdown?: boolean
@@ -75,7 +75,9 @@ export default function NewPost() {
         <textarea rows={20} name="markdown" />
       </p>
       <p>
-        <button type="submit">Create Post</button>
+        <button type="submit">
+          {transition.submission ? 'Creating...' : 'Create Post'}
+        </button>
       </p>
     </Form>
   )
