@@ -31,36 +31,48 @@ export default function PostEdit() {
   const transition = useTransition()
 
   return (
-    <Form method="post">
-      <p>
-        <label>
-          Post Title: {errors?.title ? <em>Title is required</em> : null}
-          <input type="text" name="title" defaultValue={post.title} />
-        </label>
-      </p>
-      <p>
-        <label>
-          Post Slug: {errors?.slug ? <em>Slug is required</em> : null}
-          <input type="text" name="slug" defaultValue={post.slug} />
-        </label>
-      </p>
-      <p>
-        <label>
-          Post Date: {errors?.date ? <em>Date is required</em> : null}
-          <input type="text" name="date" defaultValue={post.date} />
-        </label>
-      </p>
-      <p>
-        <label htmlFor="markdown">Markdown:</label>{' '}
-        {errors?.markdown ? <em>Markdown is required</em> : null}
-        <br />
-        <textarea rows={20} name="markdown" defaultValue={post.markdown} />
-      </p>
-      <p>
-        <button type="submit">
-          {transition.submission ? 'Saving...' : 'Save Post'}
-        </button>
-      </p>
-    </Form>
+    <>
+      <Form method="post" key={post.slug}>
+        <p>
+          <label>
+            Post Title: {errors?.title ? <em>Title is required</em> : null}
+            <input type="text" name="title" defaultValue={post.title} />
+          </label>
+        </p>
+        <p>
+          <label>
+            Post Slug: {errors?.slug ? <em>Slug is required</em> : null}
+            <input type="text" name="slug" defaultValue={post.slug} />
+          </label>
+        </p>
+        <p>
+          <label>
+            Post Date: {errors?.date ? <em>Date is required</em> : null}
+            <input type="date" name="date" defaultValue={post.date} />
+          </label>
+        </p>
+        <p>
+          <label htmlFor="markdown">Markdown:</label>{' '}
+          {errors?.markdown ? <em>Markdown is required</em> : null}
+          <br />
+          <textarea rows={20} name="markdown" defaultValue={post.markdown} />
+        </p>
+        <p>
+          <button type="submit">
+            {transition.submission ? 'Saving...' : 'Save Post'}
+          </button>
+        </p>
+        <p>
+          <button type="submit" form="removePost">
+            Remove
+          </button>
+        </p>
+      </Form>
+      <Form
+        id="removePost"
+        method="post"
+        action={`/admin/remove/${post.slug}`}
+      />
+    </>
   )
 }

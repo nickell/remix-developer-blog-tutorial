@@ -7,6 +7,7 @@ import {
 } from 'remix'
 import { createPost } from '~/posts'
 import invariant from 'tiny-invariant'
+import { dateToString } from '~/utils'
 
 export type PostError = {
   title?: boolean
@@ -65,7 +66,11 @@ export default function NewPost() {
       <p>
         <label>
           Post Date: {errors?.date ? <em>Date is required</em> : null}
-          <input type="text" name="date" />
+          <input
+            type="date"
+            name="date"
+            defaultValue={dateToString(new Date())}
+          />
         </label>
       </p>
       <p>

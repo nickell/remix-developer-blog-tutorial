@@ -26,6 +26,8 @@ export default function Admin() {
             </li>
           ))}
         </ul>
+        <br />
+        <Link to="new">Create New</Link>
       </nav>
       <main>
         <Outlet />
