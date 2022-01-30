@@ -1,23 +1,7 @@
-import { Link, useLoaderData } from 'remix'
-import { getPosts, JsonPost } from '~/posts'
-
-export const loader = () => {
-  return getPosts()
-}
-
-export default function Posts() {
-  const posts = useLoaderData<JsonPost[]>()
+export default function PostsIndex() {
   return (
-    <div>
-      <Link to="/">Back</Link>
-      <h1>Posts</h1>
-      <ul>
-        {posts.map(post => (
-          <li key={post.slug}>
-            <Link to={post.slug}>{post.title}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <p>Select a post</p>
+    </>
   )
 }

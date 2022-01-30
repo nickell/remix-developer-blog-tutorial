@@ -1,17 +1,19 @@
-import { Outlet, Link, useLoaderData, LoaderFunction } from 'remix'
-import { getPosts, Post } from '~/posts'
+import { Outlet, Link, useLoaderData, LoaderFunction, json } from 'remix'
+import { getPosts } from '~/posts'
 import adminStyles from '~/styles/admin.css'
 
 export const links = () => {
   return [{ rel: 'stylesheet', href: adminStyles }]
 }
 
-export const loader: LoaderFunction = () => {
-  return getPosts()
+type LoaderData = Awaited<ReturnType<typeof getPosts>>
+
+export const loader: LoaderFunction = async () => {
+  return json<LoaderData>(await getPosts())
 }
 
 export default function Admin() {
-  const posts = useLoaderData<Post[]>()
+  const posts = useLoaderData<LoaderData>()
   return (
     <div className="admin">
       <nav>

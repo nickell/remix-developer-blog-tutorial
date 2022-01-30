@@ -6,9 +6,11 @@ import {
   Form,
   ActionFunction,
 } from 'remix'
-import { JsonPost, getPost, removePost } from '~/posts'
+import { getPost, removePost } from '~/posts'
 import invariant from 'tiny-invariant'
 import { action as newPostAction } from '~/routes/admin/new'
+
+type LoaderData = Awaited<ReturnType<typeof getPost>>
 
 export const loader: LoaderFunction = async ({ params }) => {
   invariant(params.slug, 'expected params.slug')
@@ -16,8 +18,6 @@ export const loader: LoaderFunction = async ({ params }) => {
 }
 
 export const action: ActionFunction = async props => {
-  await new Promise(res => setTimeout(res, 1000))
-
   invariant(props.params.slug, 'expected params.slug')
 
   await removePost(props.params.slug)
@@ -26,7 +26,7 @@ export const action: ActionFunction = async props => {
 }
 
 export default function PostEdit() {
-  const post = useLoaderData<JsonPost>()
+  const post = useLoaderData<LoaderData>()
   const errors = useActionData()
   const transition = useTransition()
 
@@ -58,7 +58,7 @@ export default function PostEdit() {
       </p>
       <p>
         <button type="submit">
-          {transition.submission ? 'Creating...' : 'Create Post'}
+          {transition.submission ? 'Saving...' : 'Save Post'}
         </button>
       </p>
     </Form>

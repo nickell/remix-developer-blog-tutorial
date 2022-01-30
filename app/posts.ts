@@ -4,25 +4,16 @@ import parseFrontMatter from 'front-matter'
 import invariant from 'tiny-invariant'
 import { marked } from 'marked'
 import { instanceOfNodeError } from '~/utils'
+import { json, ThrownResponse } from 'remix'
 
-export interface JsonPost extends Omit<Post, 'date'> {
-  date: string
-}
+export type PostNotFoundResponse = ThrownResponse<404, string>
 
-export interface Post {
-  slug: string
+export type PostMarkdownAttributes = {
   title: string
   date: Date
-  html: string
-  markdown: string
 }
 
-export interface PostMarkdownAttributes {
-  title: string
-  date: string
-}
-
-interface NewPost {
+type NewPost = {
   title: string
   slug: string
   date: string
@@ -55,7 +46,7 @@ export async function getPosts() {
       return {
         slug: filename.replace(/\.md$/, ''),
         title: attributes.title,
-        date: attributes.date,
+        date: attributes.date.toISOString().split('T')[0],
       }
     })
   )
@@ -65,33 +56,30 @@ export async function getPosts() {
   )
 }
 
-export async function maybeGetPost(slug: string) {
+export async function getPost(slug: string) {
   try {
-    return await getPost(slug)
-  } catch (e) {
-    if (instanceOfNodeError(e, Error) && e.code === 'ENOENT') {
-      return null
+    const filepath = pathFromSlug(slug)
+    const file = await fs.readFile(filepath)
+    const { attributes, body } = parseFrontMatter(file.toString())
+    invariant(
+      isValidPostAttributes(attributes),
+      `Post ${filepath} is missing attributes`
+    )
+    const html = marked(body)
+
+    return {
+      slug,
+      html,
+      title: attributes.title,
+      date: attributes.date.toISOString().split('T')[0],
+      markdown: body,
+    }
+  } catch (err) {
+    if (instanceOfNodeError(err, Error) && err.code === 'ENOENT') {
+      throw json('Not Found', { status: 404 })
     }
 
-    throw e
-  }
-}
-
-export async function getPost(slug: string): Promise<JsonPost> {
-  const filepath = pathFromSlug(slug)
-  const file = await fs.readFile(filepath)
-  const { attributes, body } = parseFrontMatter(file.toString())
-  invariant(
-    isValidPostAttributes(attributes),
-    `Post ${filepath} is missing attributes`
-  )
-  const html = marked(body)
-  return {
-    slug,
-    html,
-    title: attributes.title,
-    date: attributes.date,
-    markdown: body,
+    throw err
   }
 }
 
