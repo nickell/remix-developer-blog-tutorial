@@ -1,6 +1,6 @@
 ---
 title: My First Post
-date: 2022-01-01T00:00:00.000Z
+date: 2022-01-01
 ---
 
 # This is my first post

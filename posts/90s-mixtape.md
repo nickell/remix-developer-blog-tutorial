@@ -1,6 +1,6 @@
 ---
 title: 90s Mixtape
-date: '2022-01-02'
+date: 2022-01-02
 ---
 
 # 90s Mixtape
